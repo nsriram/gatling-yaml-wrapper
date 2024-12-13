@@ -1,0 +1,5 @@
+target/
+.idea
+src/test/resources/uat.properties
+src/test/resources/sit.properties
+sonar.sh

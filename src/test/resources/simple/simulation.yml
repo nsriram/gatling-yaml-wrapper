@@ -1,0 +1,35 @@
+baseUrl:
+  'dev': 'https://computer-database.gatling.io'
+acceptHeader: 'application/html'
+contentTypeHeader: 'application/html'
+maxDuration: 5
+scenarios:
+  - name: 'computer database'
+    atOnceUsers: 1
+    rampConfig:
+      users: 1
+      duration : 2
+    chains:
+      - name: 'all computers'
+        url: '/computers/'
+        method: 'GET'
+        check:
+          status: 200
+          responseTimeInMillis: 2500
+      - name: 'macbook'
+        url: '/computers/'
+        method: 'GET'
+        queryParams:
+          'f': 'macbook'
+        check:
+          status: 200
+          responseTimeInMillis: 2500
+      - name: 'PC second page'
+        url: '/computers/'
+        method: 'GET'
+        queryParams:
+          'f': 'pc'
+          'p': '1'
+        check:
+          status: 200
+          responseTimeInMillis: 2500

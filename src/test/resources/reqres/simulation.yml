@@ -1,0 +1,54 @@
+baseUrl:
+  'dev': 'https://reqres.in'
+propertiesFile:
+  'dev': 'src/test/resources/reqres/reqres.properties'
+acceptHeader: 'application/html'
+contentTypeHeader: 'application/html'
+maxDuration: 2
+scenarios:
+  - name: 'User CRUD'
+    feedFile:
+      'dev': 'reqres/data.csv'
+    atOnceUsers: 1
+    rampConfig:
+      users: 2
+      duration: 1
+    chains:
+      - name: 'first page users'
+        url: '/api/users/'
+        method: 'GET'
+        check:
+          status: 200
+          responseTimeInMillis: 2500
+          jmesPathChecks:
+            'per_page': 6
+      - name: 'all users in one page'
+        url: '/api/users/'
+        method: 'GET'
+        queryParams:
+          'page': '1'
+          'per_page': '12'
+        check:
+          status: 200
+          responseTimeInMillis: 2500
+          jmesPathChecks:
+            'per_page': 12
+      - name: 'create cartoon'
+        url: '/api/users'
+        method: 'POST'
+        headers:
+          'Content-Type': 'application/json'
+        body:
+          templateFile: 'src/test/resources/reqres/create-cartoon.json'
+          keys:
+            - 'name'
+            - 'job'
+        check:
+          status: 201
+          responseTimeInMillis: 2500
+          jmesPathChecks:
+            'name': '#{name}'
+            'job': '#{job}'
+        saveResponseFields:
+          'name': 'createdName'
+          'job': 'createdJob'

@@ -1,0 +1,23 @@
+<configuration>
+
+    <!-- Console Appender to log to the console -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger configuration -->
+    <root level="${logLevel:-INFO}">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="io.gatling" level="${logLevel:-INFO}" />
+    <logger name="io.gatling.http" level="${logLevel:-INFO}" />
+    <logger name="io.gatling.core" level="${logLevel:-INFO}" />
+    <logger name="io.gatling.http.ahc" level="${logLevel:-INFO}" />
+    <logger name="learn.framework.core" level="${logLevel:-INFO}" >
+        <appender-ref ref="console"/>
+    </logger>
+
+</configuration>
