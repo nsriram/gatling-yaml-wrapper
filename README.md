@@ -1,5 +1,7 @@
 # Gatling yaml wrapper
 
+[![Build](https://github.com/nsriram/gatling-yaml-wrapper/actions/workflows/maven-make.yml/badge.svg)](https://github.com/nsriram/gatling-yaml-wrapper/actions/workflows/maven-make.yml)
+
 Gatling wrapper for scripting performance tests in Yaml. This tool provides the flexibility to declare performance tests
 in Yaml format
 
