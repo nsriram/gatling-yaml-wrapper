@@ -6,6 +6,7 @@ maxDuration: 5
 scenarios:
   - name: 'computer database'
     atOnceUsers: 1
+    duration: 2
     rampConfig:
       users: 1
       duration : 2

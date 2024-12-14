@@ -16,6 +16,7 @@ import java.util.Map;
 public class Simulation {
     private Map<String, String> baseUrl;
     private Map<String, String> propertiesFile;
+    private Map<String, String> feedFile;
     private String acceptHeader;
     private String contentTypeHeader;
     private int maxDuration;
@@ -51,5 +52,17 @@ public class Simulation {
         String simulationPropertiesFilePath = propertiesFile.get(env);
         LOGGER.debug("Simulation file path {}", simulationPropertiesFilePath);
         return simulationPropertiesFilePath;
+    }
+
+    public String feedFile(final String env) {
+        if (!hasFeedFile() || !feedFile.containsKey(env)) {
+            LOGGER.debug("No feed file configured for env {}", env);
+            throw new IllegalStateException("No feed file found");
+        }
+        return feedFile.get(env);
+    }
+
+    public boolean hasFeedFile() {
+        return feedFile != null && !feedFile.isEmpty();
     }
 }

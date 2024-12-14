@@ -115,4 +115,55 @@ public class SimulationTest {
         String actualSitUrl = simulation.propertiesFilePath("sit");
         assertEquals(sitPropertiesPath, actualSitUrl);
     }
+
+    @Test
+    public void shouldCheckForFeedFilePresence() {
+        Map<String, String> feedFile = Map.of("dev", "dev-data.csv");
+        Simulation simulation = new Simulation();
+        simulation.setFeedFile(feedFile);
+        assertTrue(simulation.hasFeedFile());
+    }
+
+    @Test
+    public void shouldCheckForFeedFileAbsence() {
+        Simulation simulation = new Simulation();
+        assertFalse(simulation.hasFeedFile());
+    }
+
+    @Test
+    public void shouldCheckForFeedFileEmpty() {
+        Simulation simulation = new Simulation();
+        simulation.setFeedFile(Map.of());
+        assertFalse(simulation.hasFeedFile());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfFeedFileIsMissing() {
+        Simulation simulation = new Simulation();
+        assertThrows(IllegalStateException.class, () -> {
+            simulation.feedFile("dev");
+        });
+    }
+
+    @Test
+    public void shouldThrowExceptionIfFeedFileIsNotConfiguredForEnvironment() {
+        Simulation simulation = new Simulation();
+        Map<String, String> feedFileConfig = Map.of("prod", "prod-data.csv",
+                "dev", "dev-data.csv");
+        simulation.setFeedFile(feedFileConfig);
+        assertThrows(IllegalStateException.class, () -> {
+            simulation.feedFile("sit");
+        });
+    }
+
+    @Test
+    public void shouldReturnFeedFileForEnvironment() {
+        Simulation simulation = new Simulation();
+        String sitFeed = "sit-data.csv";
+        Map<String, String> feedFileConfig = Map.of("prod", "prod-data.csv",
+                "sit", sitFeed);
+        simulation.setFeedFile(feedFileConfig);
+        assertEquals(sitFeed, simulation.feedFile("sit"));
+    }
+
 }

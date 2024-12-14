@@ -2,16 +2,17 @@ baseUrl:
   'dev': 'https://reqres.in'
 propertiesFile:
   'dev': 'src/test/resources/reqres/reqres.properties'
-acceptHeader: 'application/html'
-contentTypeHeader: 'application/html'
-maxDuration: 2
+feedFile:
+  'dev': 'reqres/data.csv'
+acceptHeader: 'application/json'
+contentTypeHeader: 'application/json'
+maxDuration: 5
 scenarios:
-  - name: 'User CRUD'
-    feedFile:
-      'dev': 'reqres/data.csv'
+  - name: 'GetUsers'
+    duration: 3
     atOnceUsers: 1
     rampConfig:
-      users: 2
+      users: 1
       duration: 1
     chains:
       - name: 'first page users'
@@ -33,6 +34,13 @@ scenarios:
           responseTimeInMillis: 2500
           jmesPathChecks:
             'per_page': 12
+  - name: 'CreateUser'
+    duration: 1
+    atOnceUsers: 1
+    rampConfig:
+      users: 1
+      duration: 1
+    chains:
       - name: 'create cartoon'
         url: '/api/users'
         method: 'POST'

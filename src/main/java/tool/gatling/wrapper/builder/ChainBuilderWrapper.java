@@ -7,8 +7,6 @@ import io.gatling.javaapi.http.HttpRequestActionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.gatling.wrapper.domain.Chain;
-import tool.gatling.wrapper.domain.Scenario;
-import tool.gatling.wrapper.feed.FeederService;
 
 import java.util.*;
 
@@ -39,13 +37,6 @@ public class ChainBuilderWrapper {
         return this;
     }
 
-    public ChainBuilderWrapper addFeedFile(final Scenario scenario, final String env) {
-        if (scenario.hasFeedFile()) {
-            chainBuilders.add(FeederService.feedChain(scenario.feedFile(env)));
-        }
-        return this;
-    }
-
     public ChainBuilderWrapper addLogSaveResponseFields(final HttpRequestActionBuilder httpRequestActionBuilder,
                                                         final Chain testChain) {
         chainBuilders.add(CoreDsl.exec(httpRequestActionBuilder)
@@ -63,6 +54,6 @@ public class ChainBuilderWrapper {
     }
 
     public List<ChainBuilder> build() {
-        return chainBuilders;
+        return Collections.synchronizedList(chainBuilders);
     }
 }

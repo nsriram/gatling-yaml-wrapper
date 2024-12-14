@@ -17,22 +17,24 @@ import tool.gatling.wrapper.config.AppConfig;
 import tool.gatling.wrapper.domain.Simulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import static io.gatling.javaapi.core.CoreDsl.exec;
+import static io.gatling.javaapi.core.CoreDsl.group;
+import static tool.gatling.wrapper.feed.FeederService.feedChain;
+
 public class FrameworkSimulation extends io.gatling.javaapi.core.Simulation {
     private static final Logger LOGGER = LoggerFactory.getLogger(FrameworkSimulation.class);
-
-    private static String simulationRecipeFile = "";
-    private static String env = "dev";
+    private static String env;
     private static Simulation simulationRecipe;
-
-    private static List<PopulationBuilder> populationBuilders = new ArrayList<>();
+    private static List<PopulationBuilder> populationBuilders;
 
     static {
-        env = System.getProperty("env", "uat");
-
-        simulationRecipeFile = System.getProperty("simulation", "simple/simulation.yml");
+        populationBuilders = Collections.synchronizedList(new ArrayList<>());
+        env = System.getProperty("env", "dev");
+        String simulationRecipeFile = System.getProperty("simulation", "simple/simulation.yml");
         simulationRecipe = SimulationYamlParser.parse(simulationRecipeFile);
 
         String propertiesPath = "";
@@ -47,11 +49,9 @@ public class FrameworkSimulation extends io.gatling.javaapi.core.Simulation {
         for (var testScenario : simulationRecipe.getScenarios()) {
             ChainBuilderWrapper chainBuilderWrapper = new ChainBuilderWrapper()
                     .addProperties(appProperties)
-                    .addUUID()
-                    .addFeedFile(testScenario, env);
+                    .addUUID();
 
             for (var testChain : testScenario.getChains()) {
-
                 HttpRequestBuilder httpRequestBuilder = new HttpRequestActionBuilderFactory()
                         .getHttpRequestBuilder(testChain);
                 httpRequestBuilder.addHeaders(testChain);
@@ -62,18 +62,22 @@ public class FrameworkSimulation extends io.gatling.javaapi.core.Simulation {
             }
 
             List<ChainBuilder> chainBuilders = chainBuilderWrapper.build();
+
             ScenarioBuilder scenarioBuilder = CoreDsl.scenario(testScenario.getName())
-                    .forever()
-                    .on(CoreDsl
-                            .group(testScenario.getName() + "  group")
-                            .on(CoreDsl.exec(chainBuilders))
-                    );
+                    .during(testScenario.getDuration())
+                    .on(exec(chainBuilders));
+
+            if (simulationRecipe.hasFeedFile()) {
+                scenarioBuilder = CoreDsl.scenario(testScenario.getName())
+                        .during(testScenario.getDuration())
+                        .on(group(testScenario.getName() + "  group")
+                                .on(feedChain(simulationRecipe.feedFile(env)).exec(chainBuilders))
+                        );
+            }
 
             InjectionStepsWrapper injectionStepsWrapper = new InjectionStepsWrapper();
             populationBuilders.add(scenarioBuilder
-                    .injectOpen(injectionStepsWrapper
-                            .injectionSteps(testScenario, simulationRecipe.getMaxDuration())
-                    )
+                    .injectOpen(injectionStepsWrapper.injectionSteps(testScenario, simulationRecipe.getMaxDuration()))
             );
         }
     }

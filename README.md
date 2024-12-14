@@ -20,11 +20,12 @@ maxDuration: 5
 scenarios:
   - name: 'computer database'
     atOnceUsers: 1
+    duration: 2
     rampConfig:
-      users: 2
-      duration : 1
+      users: 1
+      duration : 2
     chains:
-      - name: 'fetch all computers'
+      - name: 'all computers'
         url: '/computers/'
         method: 'GET'
         check:
@@ -44,7 +45,7 @@ gatling hierarchy of **simulation->scenario->chain**
 | `baseUrl`           | Base URL of the system being performance tested (simulation). <br/> Supports multiple environments | `https://computer-database.gatling.io`   |
 | `acceptHeader`      | HTTP accept header                                                                                 | `application/html` or `application/json` |
 | `contentTypeHeader` | HTTP content type header                                                                           | `application/html` or `application/json` |
-| `maxDuration`       | Maximum duration for the simulation (in seconds)                                                   | Integer value e.g., 30                   |
+| `maxDuration`       | Maximum duration for the simulation (in seconds, a value higher than scenario duration configured) | Integer value e.g., 30                   |
 | ``scenarios``       | List of scenarios                                                                                  |                                          |
 
 #### 1.1 Simulation (more) : Environment properties
@@ -83,34 +84,36 @@ sit-key2=sit-val2
 sit-key3=sit-val3
 ```
 
+#### 1.2 Simulation (more) : example with CSV feedFile
+- Framework supports CSV feed files for a simulation
+- Following example shows how the test data file in a feed can be passed to the simulation for all scenarios to consume.
+
+```
+baseUrl:
+  'dev': 'https://reqres.in'
+propertiesFile:
+  'dev': 'src/test/resources/reqres/reqres.properties'
+feedFile:
+  'dev': 'reqres/data.csv'
+acceptHeader: 'application/json'
+contentTypeHeader: 'application/json'
+maxDuration: 5
+```
+
+| Field      | Description                                                                                                                                               | Sample Value                                                                                                                                              |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `feedFile` | Test data feed file (CSV) that supports multiple environments.<br/> Test data field & values defined in the CSV are made available to the gatling session | Reference to CSV feed file. <br/> Feed file should be in classpath (e.g., simulation file directory or its sub-directories) <br/> e.g., `reqres/data.csv` |
+
 ### 2. Scenario
 
 | Field                 | Description                             | Sample Value               |
 |-----------------------|-----------------------------------------|----------------------------|
 | `name`                | Scenario name                           | All computer database info |
 | `atOnceUsers`         | Users at once (as in gatling domain)    | Integer value              |
+| `duration`            | Duration for the scenario               | Integer value              |
 | `rampConfig.users`    | Users to ramp-up (as in gatling domain) | Integer value              |
 | `rampConfig.duration` | Duration of rampup (in seconds)         | Integer value              |
 | `chains`              | URLs to be invoked. Array of chains     |                            |
-
-#### 2.1 Scenario (more) : example with feedFile
-
-Following example shows how the test data file in a feed can be passed.
-
-```
-scenarios:
-  - name: 'User CRUD'
-    feedFile:
-      'dev': 'reqres/data.csv'
-    atOnceUsers: 1
-    rampConfig:
-      users: 2
-      duration: 1
-```
-
-| Field                | Description                                                                                                                                                    | Sample Value                                                                                                                           |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `scenarios.feedFile` | Test data feed file (CSV) that supports multiple environments.<br/> Test data field & values defined in the CSV are made available to the gatling test session | Reference to CSV feed file. <br/> Feed file should be in simulation file directory or its sub-directories <br/>E.g., `reqres/data.csv` |
 
 ##### 3. Chain
 
@@ -215,6 +218,7 @@ mvn gatling:test -Denv=dev -DlogLevel=DEBUG \
 ```
 
 #### Reqres simulation
+- Example with multiple scenarios each with different duration in a simulation
 
 ```
 mvn gatling:test -Denv=dev -DlogLevel=DEBUG \
@@ -239,7 +243,7 @@ mvn gatling:test -Denv=dev -DlogLevel=DEBUG \
 3. Place it in the src/test/resources folder (inside a new folder preferred)
 4. If you need properties, feedFile, requestBody JSON place them in the folder where your simulation file and reference
    them as in samples
-5. Run the maven command [Ref: Invocation section](#invocation). Enabling DEBUG helps in debugging better with gatling
+5. Run the maven command [Ref: Invocation section](#invocation--frameworksimulation-class). Enabling DEBUG helps in debugging better with gatling
    logs.
 
 ### References
